@@ -73,7 +73,8 @@ fn encode(file_path: &str, blocksize: u32) -> Result<Vec<BigUint>, std::io::Erro
     for i in 0..num_blocks {
         let lower: usize = (i*blocksize) as usize;
         let upper: usize = ((i+1)*blocksize) as usize;
-        blocks.push(BigUint::from_bytes_be(&all_bytes[lower..upper]));                                  }
+        blocks.push(BigUint::from_bytes_be(&all_bytes[lower..upper]));
+    }
     Ok(blocks)                                
 }
 
@@ -133,6 +134,5 @@ fn main() {
 
     let encoded_file2: Vec<BigUint> = encode(efp, blocksize2).unwrap();
     let decrypted_bytes: Vec<u8> = crypt(&encoded_file2, &keys.1, blocksize1);
-    write_file(&decrypted_bytes, dfp);
-    
+    write_file(&decrypted_bytes, dfp);    
 }
