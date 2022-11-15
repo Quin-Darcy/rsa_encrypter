@@ -6,7 +6,9 @@ use num_bigint::{BigUint, BigInt, RandBigInt, ToBigInt};
 use num_traits::{zero, one};
 
 
-const BLOCKSIZE: u32 = 16;
+const BITLENGTH: u32 = 256;
+const E_BLOCKSIZE: u32 = 64;
+const D_BLOCKSIZE: u32 = 16;
 
 fn gcd(a: u32, b: u32) -> u32 {
     if b == 0 {
@@ -101,7 +103,7 @@ fn map_block(block: &BigUint, key: &(BigUint, BigUint)) -> BigUint {
 
 fn crypt(encoded_file: &Vec<BigUint>, key: &(BigUint, BigUint), blocksize: u32) -> Vec<u8> {
     let mut crypt_bytes: Vec<u8> = Vec::new();
-    let mut b: Vec<u8> = Vec::new();
+    let mut b: Vec<u8>;
     for block in encoded_file {
         b = map_block(&block, key).to_bytes_be();
         let diff: usize = (blocksize-(b.len() as u32)) as usize;
@@ -120,19 +122,16 @@ fn write_file(encrypted_bytes: &Vec<u8>, path: &str) {
 }
 
 fn main() {
-    let n: u32 = 256;
-    let blocksize1: u32 = 16;
-    let blocksize2: u32 = 64;
-    let keys: ((BigUint, BigUint), (BigUint, BigUint)) = gen_keys(n);
+    let keys: ((BigUint, BigUint), (BigUint, BigUint)) = gen_keys(BITLENGTH);
     let fp: &str = "/home/arbegla/Projects/Rust/tests/rsa_enc/src/main.rs";
     let efp: &str = "/home/arbegla/Projects/Rust/tests/rsa_enc/src/enc_main.rs";
     let dfp: &str = "/home/arbegla/Projects/Rust/tests/rsa_enc/src/dec_main.rs";
     
-    let encoded_file1: Vec<BigUint> = encode(fp, blocksize1).unwrap();
-    let encrypted_bytes: Vec<u8> = crypt(&encoded_file1, &keys.0, blocksize2);
+    let encoded_file1: Vec<BigUint> = encode(fp, D_BLOCKSIZE).unwrap();
+    let encrypted_bytes: Vec<u8> = crypt(&encoded_file1, &keys.0, E_BLOCKSIZE);
     write_file(&encrypted_bytes, efp);
 
-    let encoded_file2: Vec<BigUint> = encode(efp, blocksize2).unwrap();
-    let decrypted_bytes: Vec<u8> = crypt(&encoded_file2, &keys.1, blocksize1);
+    let encoded_file2: Vec<BigUint> = encode(efp, E_BLOCKSIZE).unwrap();
+    let decrypted_bytes: Vec<u8> = crypt(&encoded_file2, &keys.1, D_BLOCKSIZE);
     write_file(&decrypted_bytes, dfp);    
 }
